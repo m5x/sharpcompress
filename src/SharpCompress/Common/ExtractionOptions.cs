@@ -30,5 +30,9 @@
         public delegate void SymbolicLinkWriterDelegate(string sourcePath, string targetPath);
 
         public SymbolicLinkWriterDelegate WriteSymbolicLink;
+        
+        public delegate void PostWriteDelegate(IEntry entry, string targetPath);
+
+        public PostWriteDelegate PostWriteHandler;
     }
 }

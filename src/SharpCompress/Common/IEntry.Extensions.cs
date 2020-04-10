@@ -41,6 +41,8 @@ namespace SharpCompress.Common
                         nf.Attributes = (FileAttributes)System.Enum.ToObject(typeof(FileAttributes), entry.Attrib.Value);
                     }
                 }
+
+                options?.PostWriteHandler( entry, destinationFileName );
             }
         }
     }
