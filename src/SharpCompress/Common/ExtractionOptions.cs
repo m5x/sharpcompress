@@ -34,5 +34,7 @@
         public delegate void PostWriteDelegate(IEntry entry, string targetPath);
 
         public PostWriteDelegate PostWriteHandler;
+        
+        public int? StripComponents { get; set; }
     }
 }

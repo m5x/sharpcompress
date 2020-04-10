@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 
 namespace SharpCompress.Common
 {
     internal static class ExtractionMethods
     {
+        static readonly char[] _PathComponentsSeparators =  { '/', '\\' };
+
         /// <summary>
         /// Extract to specific directory, retaining filename
         /// </summary>
@@ -23,6 +27,46 @@ namespace SharpCompress.Common
             if (options.ExtractFullPath)
             {
                 string folder = Path.GetDirectoryName(entry.Key);
+
+                if(options.StripComponents.HasValue)
+                {
+                    folder = folder.Trim( _PathComponentsSeparators );
+                    folder += '/';
+                    
+                    var folderLength = folder.Length;
+                    var stripIndex = 0;
+                    
+                    for(int n = 0, c = options.StripComponents.Value; n < c; n++)
+                    {
+                        stripIndex = folder.IndexOfAny( _PathComponentsSeparators, stripIndex );
+                        if( stripIndex < 0 )
+                            return; // mimic tar --strip-components behavior, i.e. throw away content not deep enough
+
+                        // consider multiple sequential path component separators as one
+                        stripIndex++;
+                        while( stripIndex < folderLength )
+                        {
+                            var strip = false;
+                            var chr = folder[stripIndex];
+                            for( int i = 0; i < _PathComponentsSeparators.Length; i++ )
+                            {
+                                if( chr == _PathComponentsSeparators[i] )
+                                {
+                                    strip = true;
+                                    break;
+                                }
+                            }
+
+                            if( strip )
+                                stripIndex++;
+                            else
+                                break;
+                        }
+                    }
+
+                    folder = folder.Substring( stripIndex ).TrimEnd( '/' );
+                }
+                
                 string destdir = Path.GetFullPath(
                                                   Path.Combine(fullDestinationDirectoryPath, folder)
                                                  );
